@@ -7,6 +7,8 @@ buttons for all of it. Everything auto-installs on first launch via
 `lazy.nvim` — **except the external tools below, which cannot be bundled in
 a Lua config and must be on your `PATH` first.**
 
+![screenshot](screenshot.png)
+
 ## 1. Prerequisites (install these before opening Neovim)
 
 Run these in an elevated PowerShell prompt (`winget` ships with Windows 11):
