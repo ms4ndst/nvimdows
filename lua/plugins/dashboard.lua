@@ -36,6 +36,7 @@ return {
       dashboard.button("e", "  File explorer", "<cmd>Neotree toggle<CR>"),
       dashboard.button("s", "  Git status", "<cmd>Telescope git_status<CR>"),
       dashboard.button("a", "  Claude Code", "<cmd>ClaudeCode<CR>"),
+      dashboard.button("v", "  Mistral Vibe", "<cmd>MistralVibe<CR>"),
       dashboard.button("m", "  Mason (LSP / tools)", "<cmd>Mason<CR>"),
       dashboard.button("l", "  Lazy (plugins)", "<cmd>Lazy<CR>"),
       dashboard.button("c", "  Edit config", "<cmd>edit " .. vim.fn.stdpath("config") .. "/init.lua<CR>"),

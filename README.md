@@ -1,9 +1,10 @@
 # Nvimdows — Neovim on Windows 11, Fully Configured
 
 A ready-to-launch, Catppuccin-themed Neovim distribution branded **Nvimdows**:
-LSP-backed completion, Treesitter, fuzzy finding, a file tree, git signs, an
-embedded Claude Code panel, and a branded start screen with quick-launch
-buttons for all of it. Everything auto-installs on first launch via
+LSP-backed completion, Treesitter, fuzzy finding, a file tree, git signs, two
+embedded AI agent panels (Claude Code and Mistral Vibe), and a branded start
+screen with quick-launch buttons for all of it. Everything auto-installs on
+first launch via
 `lazy.nvim` — **except the external tools below, which cannot be bundled in
 a Lua config and must be on your `PATH` first.**
 
@@ -31,6 +32,7 @@ Also install:
 | **Python 3** | `pyright` (Python LSP) and the `black` formatter | `winget install -e --id Python.Python.3.12` |
 | **A Nerd Font** | File/git icons render as boxes without one | `winget install -e --id DEVCOM.CascadiaCodeNerdFont`, then set it as your terminal's font (Windows Terminal → Settings → Profile → Appearance → Font face) |
 | **Claude Code CLI** | Powers the in-editor AI panel (`claude-code.nvim`) | You already have this (`npm install -g @anthropic-ai/claude-code` if not); run `claude` once outside Neovim to confirm you're logged in |
+| **`vibe` (Mistral Vibe) CLI** *(optional)* | Second AI agent option, docked the same way as Claude Code | See [Mistral's install docs](https://docs.mistral.ai/mistral-vibe/introduction); needs a `MISTRAL_API_KEY` or `vibe --setup`. Skip this if you only want Claude Code — the button/keymap just shows "command not found" if `vibe` isn't installed, nothing else breaks |
 | **`make` + `gcc`** *(optional)* | Builds LuaSnip's native `jsregexp` lib, needed only for snippet variable/placeholder transformations — everything else about completion/snippets works without it. `zig` (above) can't substitute here: this native Windows `make` runs recipes via raw `CreateProcess` with no shell, so a multi-word compiler override like `zig cc` can't be resolved as one executable. Silently skipped if missing — never breaks the rest of the install. | `winget install -e --id ezwinports.make` and `winget install -e --id BrechtSanders.WinLibs.POSIX.UCRT` (bundles `gcc`) |
 
 Restart your terminal after installing so `PATH` updates take effect. Verify with:
@@ -81,7 +83,8 @@ shows green, and `:Mason` to confirm the servers installed.
 | [lua/plugins/treesitter.lua](lua/plugins/treesitter.lua) | Accurate syntax highlighting/indent via real parsing (needs the `zig` compiler installed above) |
 | [lua/plugins/lsp.lua](lua/plugins/lsp.lua) | Mason + lspconfig (diagnostics, go-to-def, hover, rename) + conform.nvim (format-on-save) |
 | [lua/plugins/completion.lua](lua/plugins/completion.lua) | nvim-cmp — the completion popup, fed by LSP/snippets/buffer/path sources. Also builds LuaSnip's optional `jsregexp` native lib (needs `make` + `gcc` from above) |
-| [lua/plugins/claude-code.lua](lua/plugins/claude-code.lua) | Docks the `claude` CLI in a terminal split — the AI agent integration |
+| [lua/plugins/claude-code.lua](lua/plugins/claude-code.lua) | Docks the `claude` CLI in a terminal split — the primary AI agent integration |
+| [lua/plugins/mistral-vibe.lua](lua/plugins/mistral-vibe.lua) | Docks the `vibe` CLI (Mistral Vibe) in a terminal split via toggleterm.nvim — a second, optional AI agent option, same pattern as Claude Code |
 | [lua/plugins/telescope.lua](lua/plugins/telescope.lua) | Fuzzy file/text/symbol search (needs `ripgrep` + `fd` installed above) |
 | [lua/plugins/neo-tree.lua](lua/plugins/neo-tree.lua) | Sidebar file explorer |
 | [lua/plugins/lualine.lua](lua/plugins/lualine.lua) | Statusline |
@@ -98,6 +101,7 @@ everything below, so you don't need to memorize this table.
 | `<leader>ff` / `fg` / `fb` / `fr` | Find files / grep / buffers / recent files |
 | `<leader>e` | Toggle file tree |
 | `<leader>ac` | Toggle Claude Code panel |
+| `<leader>av` | Toggle Mistral Vibe panel (needs the optional `vibe` CLI — see prerequisites) |
 | `<leader>ct` | Choose theme (Catppuccin latte / frappe / macchiato / mocha) — choice persists across restarts |
 | `<C-,>` | Quick-toggle Claude Code panel (works while inside its terminal too) |
 | `gd` / `gr` / `K` | Go to definition / references / hover docs (LSP, only in buffers with a server attached) |
@@ -116,7 +120,7 @@ letter, or click/`<CR>` on a line, to launch that action directly.
 - **Change theme flavor**: press `<leader>ct` or the "Choose theme" button on the start screen and pick latte (light), frappe, macchiato, or mocha — it switches immediately and is remembered for next launch (stored in `stdpath("state")/nvimdows-theme.txt`, managed by [lua/config/theme.lua](lua/config/theme.lua)). To change the *default* for a first-ever launch, edit the fallback in `theme.load()`. Swapping away from Catppuccin entirely (e.g. to `tokyonight`) means replacing [lua/plugins/colorscheme.lua](lua/plugins/colorscheme.lua) and [lua/config/theme.lua](lua/config/theme.lua), plus updating each other plugin's `integrations`/`theme` field that references `"catppuccin"`.
 - **Add an LSP server**: find its Mason name at `:Mason`, add it to `ensure_installed` in [lua/plugins/lsp.lua](lua/plugins/lsp.lua), and add an entry (even an empty `{}`) to the `servers` table in the same file.
 - **Add a formatter**: add the tool to `ensure_installed` in the `mason-tool-installer` block and map it to a filetype in `formatters_by_ft`, both in [lua/plugins/lsp.lua](lua/plugins/lsp.lua).
-- **Swap the AI integration**: `claude-code.nvim` was chosen because it just wraps the CLI you already use, which makes it robust to plugin API changes. If you'd rather have inline AI diffs/chat native to Neovim against a raw Anthropic API key instead of the CLI, replace [lua/plugins/claude-code.lua](lua/plugins/claude-code.lua) with `yetone/avante.nvim` or `olimorris/codecompanion.nvim` — both support Claude models directly. If you want an agent that isn't Claude at all, [Mistral Vibe](https://mistral.ai/products/vibe/) is a comparable CLI coding agent from Mistral; it speaks the [Agent Client Protocol](https://agentclientprotocol.com/) (ACP), so instead of a Claude-specific plugin you'd use `carlos-algms/agentic.nvim`, which docks any ACP agent (Mistral Vibe, Claude Code, Gemini, Codex, and others) the same way `claude-code.nvim` docks the `claude` CLI — configure it with Mistral Vibe's `vibe-acp` launch command per its [ACP setup docs](https://github.com/mistralai/mistral-vibe/blob/main/docs/acp-setup.md).
+- **AI agents**: Claude Code (`<leader>ac`) and Mistral Vibe (`<leader>av`) are both docked as parallel options, each just a CLI in a terminal split — pick whichever, or use both. `claude-code.nvim` ([lua/plugins/claude-code.lua](lua/plugins/claude-code.lua)) is a dedicated wrapper with session-resume support; Mistral Vibe ([lua/plugins/mistral-vibe.lua](lua/plugins/mistral-vibe.lua)) uses toggleterm.nvim's named-terminal support instead, since no dedicated `vibe`-wrapper plugin exists. To add another CLI agent the same way, copy `mistral-vibe.lua` and swap `cmd = "vibe"` for your tool. If you'd rather have inline AI diffs/chat native to Neovim instead of a terminal, replace either file with `yetone/avante.nvim` or `olimorris/codecompanion.nvim` (Claude models), or `carlos-algms/agentic.nvim` (speaks the [Agent Client Protocol](https://agentclientprotocol.com/), so it can dock Mistral Vibe, Claude Code, Gemini, Codex, and others through one interface — configure it with Mistral Vibe's `vibe-acp` launch command per its [ACP setup docs](https://github.com/mistralai/mistral-vibe/blob/main/docs/acp-setup.md)).
 - **Add a new plugin**: drop a new file in `lua/plugins/` returning a lazy.nvim spec table; it's picked up automatically, nothing else to wire up.
 - **Rebrand or re-theme the start screen**: the banner text and every button live in [lua/plugins/dashboard.lua](lua/plugins/dashboard.lua) as plain Lua tables — edit `dashboard.section.header.val` for the ASCII art (regenerate one at [patorjk.com/software/taag](https://patorjk.com/software/taag/) with the "ANSI Shadow" font) and `dashboard.section.buttons.val` to add/remove menu entries.
 
