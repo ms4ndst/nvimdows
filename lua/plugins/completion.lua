@@ -11,7 +11,10 @@ return {
       "hrsh7th/cmp-nvim-lsp", -- source: language server suggestions
       "hrsh7th/cmp-buffer", -- source: words from open buffers
       "hrsh7th/cmp-path", -- source: filesystem paths
-      "L3MON4D3/LuaSnip", -- snippet engine
+      {
+        "L3MON4D3/LuaSnip", -- snippet engine
+        build = "make install_jsregexp", -- native lib needed for snippet variable/placeholder transforms; needs `make` + a C compiler on PATH
+      },
       "saadparwaiz1/cmp_luasnip", -- source: snippets from LuaSnip
       "rafamadriz/friendly-snippets", -- a large pre-built snippet collection
       "onsails/lspkind.nvim", -- adds icons/labels to completion items
