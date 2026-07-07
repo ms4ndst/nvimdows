@@ -15,6 +15,11 @@
 -- installed, toggling this just shows "command not found" in the terminal;
 -- it doesn't affect anything else in the config.
 
+-- Half the screen width, matching Claude Code's split_ratio (plugins/claude-code.lua).
+local function vibe_width()
+  return math.floor(vim.o.columns * 0.5)
+end
+
 -- Created once and reused (not per-keypress) so toggling actually shows/hides
 -- the same terminal instead of spawning a new `vibe` process every time.
 local vibe_terminal
@@ -24,13 +29,15 @@ local function toggle_vibe()
     vibe_terminal = require("toggleterm.terminal").Terminal:new({
       cmd = "vibe",
       direction = "vertical", -- mirrors Claude Code's right-hand split
-      size = function()
-        return math.floor(vim.o.columns * 0.4)
-      end,
       hidden = true,
     })
   end
-  vibe_terminal:toggle()
+  -- toggleterm reads window size from the argument passed to :toggle()/:open(),
+  -- NOT from the `size` field on the Terminal object -- passing it here (every
+  -- time, since the window may have been manually resized since) is the only
+  -- way this actually takes effect; setting size in Terminal:new() is silently
+  -- ignored and falls back to toggleterm's own small global default.
+  vibe_terminal:toggle(vibe_width(), "vertical")
 end
 
 return {
@@ -42,7 +49,16 @@ return {
   keys = {
     { "<leader>av", toggle_vibe, desc = "Toggle Mistral Vibe" },
   },
-  opts = {},
+  opts = {
+    -- Also set the global default (used by a bare :ToggleTerm) to the same
+    -- 50/50 split, for consistency even though nothing else here uses it yet.
+    size = function(term)
+      if term.direction == "vertical" then
+        return vibe_width()
+      end
+      return 15
+    end,
+  },
   config = function(_, opts)
     require("toggleterm").setup(opts)
     vim.api.nvim_create_user_command("MistralVibe", toggle_vibe, { desc = "Toggle Mistral Vibe" })

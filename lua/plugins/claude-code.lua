@@ -17,7 +17,7 @@ return {
   opts = {
     window = {
       position = "vertical", -- docks Claude in a right-hand split
-      split_ratio = 0.4,
+      split_ratio = 0.5, -- matches Mistral Vibe's width (plugins/mistral-vibe.lua) so either agent gets half the screen
     },
     keymaps = {
       toggle = { normal = "<C-,>", terminal = "<C-,>" }, -- quick toggle from anywhere, including insert-mode-of-the-terminal
