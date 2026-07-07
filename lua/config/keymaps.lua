@@ -36,3 +36,8 @@ map("n", "N", "Nzzzv")
 -- Save / quit
 map("n", "<leader>w", "<cmd>write<CR>", { desc = "Save file" })
 map("n", "<leader>q", "<cmd>quit<CR>", { desc = "Quit window" })
+
+-- Theme (also available as the "Choose theme" button on the start screen)
+map("n", "<leader>ct", function()
+  require("config.theme").pick()
+end, { desc = "Choose color theme" })

@@ -39,6 +39,7 @@ return {
       dashboard.button("m", "  Mason (LSP / tools)", "<cmd>Mason<CR>"),
       dashboard.button("l", "  Lazy (plugins)", "<cmd>Lazy<CR>"),
       dashboard.button("c", "  Edit config", "<cmd>edit " .. vim.fn.stdpath("config") .. "/init.lua<CR>"),
+      dashboard.button("t", "  Choose theme", "<cmd>lua require('config.theme').pick()<CR>"),
       dashboard.button("h", "  Check health", "<cmd>checkhealth<CR>"),
       dashboard.button("q", "  Quit", "<cmd>qa<CR>"),
     }

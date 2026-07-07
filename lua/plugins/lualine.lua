@@ -1,28 +1,18 @@
 -- Lualine: statusline. Shows mode, git branch, diagnostics, filetype, and
 -- cursor position -- the information you'd otherwise have to check with
 -- separate commands.
+--
+-- The theme name (catppuccin ships one lualine theme per flavour, e.g.
+-- catppuccin-mocha, not a generic "catppuccin" theme) is built by
+-- lua/config/theme.lua so it can't drift out of sync with whatever flavour
+-- the theme picker last chose -- that module also re-runs this same opts
+-- table when you switch flavours at runtime.
 
 return {
   "nvim-lualine/lualine.nvim",
   dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim" },
   event = "VeryLazy",
   opts = function()
-    -- catppuccin ships one lualine theme per flavour (catppuccin-mocha,
-    -- catppuccin-latte, ...), not a generic "catppuccin" theme -- derive the
-    -- name from whichever flavour colorscheme.lua has active so the two
-    -- files can't drift out of sync if the flavour is ever changed.
-    local theme = "catppuccin-" .. require("catppuccin").flavour
-
-    return {
-      options = {
-        theme = theme,
-        globalstatus = true,
-        disabled_filetypes = { statusline = { "alpha" } }, -- keep the Nvimdows dashboard free of a statusline
-      },
-      sections = {
-        lualine_c = { { "filename", path = 1 } }, -- relative path instead of just the basename
-        lualine_x = { "diagnostics", "encoding", "filetype" },
-      },
-    }
+    return require("config.theme").lualine_opts()
   end,
 }

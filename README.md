@@ -72,8 +72,9 @@ shows green, and `:Mason` to confirm the servers installed.
 | [lua/config/keymaps.lua](lua/config/keymaps.lua) | Keymaps not owned by a specific plugin |
 | [lua/config/autocmds.lua](lua/config/autocmds.lua) | Yank highlight, cursor restore, trim-trailing-whitespace-on-save |
 | [lua/config/lazy-bootstrap.lua](lua/config/lazy-bootstrap.lua) | Installs `lazy.nvim` itself if missing, then loads `lua/plugins/*` |
-| [lua/plugins/colorscheme.lua](lua/plugins/colorscheme.lua) | Catppuccin (mocha flavor) — theming |
-| [lua/plugins/dashboard.lua](lua/plugins/dashboard.lua) | The Nvimdows start screen (alpha-nvim) — ASCII banner + quick-launch buttons, shown only when Neovim opens with no file argument |
+| [lua/plugins/colorscheme.lua](lua/plugins/colorscheme.lua) | Catppuccin theming — active flavour comes from `lua/config/theme.lua`, defaults to mocha |
+| [lua/config/theme.lua](lua/config/theme.lua) | Persists your chosen Catppuccin flavour (latte/frappe/macchiato/mocha) across restarts and applies it live via the theme picker |
+| [lua/plugins/dashboard.lua](lua/plugins/dashboard.lua) | The Nvimdows start screen (alpha-nvim) — ASCII banner + quick-launch buttons, including the theme picker, shown only when Neovim opens with no file argument |
 | [lua/plugins/treesitter.lua](lua/plugins/treesitter.lua) | Accurate syntax highlighting/indent via real parsing (needs the `zig` compiler installed above) |
 | [lua/plugins/lsp.lua](lua/plugins/lsp.lua) | Mason + lspconfig (diagnostics, go-to-def, hover, rename) + conform.nvim (format-on-save) |
 | [lua/plugins/completion.lua](lua/plugins/completion.lua) | nvim-cmp — the completion popup, fed by LSP/snippets/buffer/path sources |
@@ -94,6 +95,7 @@ everything below, so you don't need to memorize this table.
 | `<leader>ff` / `fg` / `fb` / `fr` | Find files / grep / buffers / recent files |
 | `<leader>e` | Toggle file tree |
 | `<leader>ac` | Toggle Claude Code panel |
+| `<leader>ct` | Choose theme (Catppuccin latte / frappe / macchiato / mocha) — choice persists across restarts |
 | `<C-,>` | Quick-toggle Claude Code panel (works while inside its terminal too) |
 | `gd` / `gr` / `K` | Go to definition / references / hover docs (LSP, only in buffers with a server attached) |
 | `<leader>rn` / `ca` | Rename symbol / code action |
@@ -108,7 +110,7 @@ letter, or click/`<CR>` on a line, to launch that action directly.
 
 ## 5. Customizing
 
-- **Change theme flavor**: edit `flavour` in [lua/plugins/colorscheme.lua](lua/plugins/colorscheme.lua) to `latte` (light), `frappe`, or `macchiato`. Swapping themes entirely (e.g. to `tokyonight`) means replacing this file and updating each other plugin's `integrations`/`theme` field that references `"catppuccin"`.
+- **Change theme flavor**: press `<leader>ct` or the "Choose theme" button on the start screen and pick latte (light), frappe, macchiato, or mocha — it switches immediately and is remembered for next launch (stored in `stdpath("state")/nvimdows-theme.txt`, managed by [lua/config/theme.lua](lua/config/theme.lua)). To change the *default* for a first-ever launch, edit the fallback in `theme.load()`. Swapping away from Catppuccin entirely (e.g. to `tokyonight`) means replacing [lua/plugins/colorscheme.lua](lua/plugins/colorscheme.lua) and [lua/config/theme.lua](lua/config/theme.lua), plus updating each other plugin's `integrations`/`theme` field that references `"catppuccin"`.
 - **Add an LSP server**: find its Mason name at `:Mason`, add it to `ensure_installed` in [lua/plugins/lsp.lua](lua/plugins/lsp.lua), and add an entry (even an empty `{}`) to the `servers` table in the same file.
 - **Add a formatter**: add the tool to `ensure_installed` in the `mason-tool-installer` block and map it to a filetype in `formatters_by_ft`, both in [lua/plugins/lsp.lua](lua/plugins/lsp.lua).
 - **Swap the AI integration**: `claude-code.nvim` was chosen because it just wraps the CLI you already use, which makes it robust to plugin API changes. If you'd rather have inline AI diffs/chat native to Neovim against a raw Anthropic API key instead of the CLI, replace [lua/plugins/claude-code.lua](lua/plugins/claude-code.lua) with `yetone/avante.nvim` or `olimorris/codecompanion.nvim` — both support Claude models directly.
