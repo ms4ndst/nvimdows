@@ -13,7 +13,24 @@ return {
       "hrsh7th/cmp-path", -- source: filesystem paths
       {
         "L3MON4D3/LuaSnip", -- snippet engine
-        build = "make install_jsregexp", -- native lib needed for snippet variable/placeholder transforms; needs `make` + a C compiler on PATH
+        -- Builds the native jsregexp lib needed for snippet variable/placeholder
+        -- transforms (an optional, narrow feature -- everything else about
+        -- completion/snippets works without it). Needs `make` AND a plain
+        -- `gcc` on PATH: this native Windows `make` runs recipe commands via
+        -- raw CreateProcess with no shell involved, so a multi-word CC
+        -- override like `zig cc` can't work (Windows can't resolve "zig cc"
+        -- as one executable without a shell to split it) -- `zig` can't
+        -- substitute for gcc here the way it does for Treesitter's build.
+        -- Silently skipped if either tool is missing, so it never breaks the
+        -- rest of the install.
+        build = function(plugin)
+          local make = vim.fn.exepath("make")
+          local gcc = vim.fn.exepath("gcc")
+          if make == "" or gcc == "" then
+            return
+          end
+          vim.system({ make, "install_jsregexp" }, { cwd = plugin.dir }):wait()
+        end,
       },
       "saadparwaiz1/cmp_luasnip", -- source: snippets from LuaSnip
       "rafamadriz/friendly-snippets", -- a large pre-built snippet collection
